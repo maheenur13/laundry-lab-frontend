@@ -52,9 +52,15 @@ export default function LoginScreen() {
         onSuccess: (result) => {
           // In development, show the OTP for testing
           if (result.otp) {
-            Alert.alert('Development OTP', `Your OTP is: ${result.otp}`, [
-              { text: 'OK', onPress: () => router.push('/(auth)/otp') },
-            ]);
+            if (Platform.OS === 'web') {
+              // On web, use window.alert (no callback support)
+              window.alert(`Development OTP: ${result.otp}`);
+              router.push('/(auth)/otp');
+            } else {
+              Alert.alert('Development OTP', `Your OTP is: ${result.otp}`, [
+                { text: 'OK', onPress: () => router.push('/(auth)/otp') },
+              ]);
+            }
           } else {
             router.push('/(auth)/otp');
           }
