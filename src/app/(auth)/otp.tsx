@@ -16,6 +16,7 @@ import { Button } from '../../components/ui';
 import { useAuthStore } from '../../stores/authStore';
 import { useVerifyOtp, useRequestOtp } from '../../hooks';
 import { colors, spacing, fontSize, borderRadius, shadows } from '../../constants/theme';
+import { UserRole } from '../../types/user';
 
 const OTP_LENGTH = 6;
 const RESEND_TIMER = 60;
@@ -98,8 +99,22 @@ export default function OtpScreen() {
         onSuccess: (data) => {
           if (data.isNewUser) {
             router.replace('/(auth)/complete-profile');
+          } else {
+            // Navigate based on user role
+            switch (data.user.role) {
+              case UserRole.CUSTOMER:
+                router.replace('/(customer)/home');
+                break;
+              case UserRole.DELIVERY:
+                router.replace('/(delivery)/dashboard');
+                break;
+              case UserRole.ADMIN:
+                router.replace('/(admin)/dashboard');
+                break;
+              default:
+                router.replace('/(customer)/home');
+            }
           }
-          // Navigation to home is handled by _layout.tsx
         },
         onError: (err) => {
           setError(err instanceof Error ? err.message : t('auth.invalidOtp'));

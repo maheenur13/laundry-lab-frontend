@@ -8,6 +8,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 import { IconUser, IconMapPin, IconSparkles } from '@tabler/icons-react-native';
 import { useTranslation } from 'react-i18next';
 import { Button, Input } from '../../components/ui';
@@ -20,6 +21,7 @@ import { colors, spacing, fontSize, borderRadius, shadows } from '../../constant
  */
 export default function CompleteProfileScreen() {
   const { t } = useTranslation();
+  const router = useRouter();
   const phoneNumber = useAuthStore((state) => state.phoneNumber);
   const completeSignupMutation = useCompleteSignup();
 
@@ -61,6 +63,10 @@ export default function CompleteProfileScreen() {
         address: address.trim(),
       },
       {
+        onSuccess: () => {
+          // New signups are always customers
+          router.replace('/(customer)/home');
+        },
         onError: (err) => {
           setErrors({
             fullName: err instanceof Error ? err.message : 'Failed to complete signup',
@@ -68,7 +74,6 @@ export default function CompleteProfileScreen() {
         },
       },
     );
-    // Navigation is handled by _layout.tsx
   };
 
   return (
