@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -7,21 +7,28 @@ import {
   ScrollView,
   Alert,
   Switch,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+  Platform,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
 import {
   IconArrowLeft,
   IconMapPin,
   IconFileText,
   IconCheck,
-} from '@tabler/icons-react-native';
-import { useTranslation } from 'react-i18next';
-import { Card, Button, Input } from '../../components/ui';
-import { useCartStore } from '../../stores/cartStore';
-import { useCreateOrder } from '../../hooks';
-import { useAuthStore } from '../../stores/authStore';
-import { colors, spacing, fontSize, borderRadius, shadows } from '../../constants/theme';
+} from "@tabler/icons-react-native";
+import { useTranslation } from "react-i18next";
+import { Card, Button, Input } from "../../components/ui";
+import { useCartStore } from "../../stores/cartStore";
+import { useCreateOrder } from "../../hooks";
+import { useAuthStore } from "../../stores/authStore";
+import {
+  colors,
+  spacing,
+  fontSize,
+  borderRadius,
+  shadows,
+} from "../../constants/theme";
 
 /**
  * Checkout screen - Professional design.
@@ -29,18 +36,50 @@ import { colors, spacing, fontSize, borderRadius, shadows } from '../../constant
 export default function CheckoutScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { items, itemsTotal, deliveryCharge, grandTotal, clearCart } = useCartStore();
+  const { items, itemsTotal, deliveryCharge, grandTotal, clearCart } =
+    useCartStore();
   const createOrderMutation = useCreateOrder();
   const { user } = useAuthStore();
 
-  const [pickupAddress, setPickupAddress] = useState(user?.address || '');
+  const [pickupAddress, setPickupAddress] = useState(user?.address || "");
   const [sameAsPickup, setSameAsPickup] = useState(true);
-  const [deliveryAddress, setDeliveryAddress] = useState('');
-  const [notes, setNotes] = useState('');
+  const [deliveryAddress, setDeliveryAddress] = useState("");
+  const [notes, setNotes] = useState("");
 
   const handlePlaceOrder = async () => {
+    // Debug logging for web
+
+    // Check if cart is empty
+    if (items.length === 0) {
+      if (Platform.OS === "web") {
+        window.alert(
+          "Your cart is empty. Please add items before placing an order."
+        );
+      } else {
+        Alert.alert(
+          "Error",
+          "Your cart is empty. Please add items before placing an order."
+        );
+      }
+      return;
+    }
+
     if (!pickupAddress.trim()) {
-      Alert.alert('Error', 'Please enter a pickup address');
+      if (Platform.OS === "web") {
+        window.alert("Please enter a pickup address");
+      } else {
+        Alert.alert("Error", "Please enter a pickup address");
+      }
+      return;
+    }
+
+    // Validate delivery address if different from pickup
+    if (!sameAsPickup && !deliveryAddress.trim()) {
+      if (Platform.OS === "web") {
+        window.alert("Please enter a delivery address");
+      } else {
+        Alert.alert("Error", "Please enter a delivery address");
+      }
       return;
     }
 
@@ -62,36 +101,44 @@ export default function CheckoutScreen() {
     };
 
     createOrderMutation.mutate(orderData, {
-      onSuccess: () => {
+      onSuccess: (data) => {
         clearCart();
-        Alert.alert(
-          t('checkout.orderSuccess'),
-          'Your order has been placed successfully!',
-          [
-            {
-              text: 'View Order',
-              onPress: () => router.replace('/(customer)/orders'),
-            },
-          ],
-        );
+        if (Platform.OS === "web") {
+          window.alert("Your order has been placed successfully!");
+          router.replace("/(customer)/orders");
+        } else {
+          Alert.alert(
+            t("checkout.orderSuccess"),
+            "Your order has been placed successfully!",
+            [
+              {
+                text: "View Order",
+                onPress: () => router.replace("/(customer)/orders"),
+              },
+            ]
+          );
+        }
       },
       onError: (error) => {
-        Alert.alert(
-          'Error',
-          error instanceof Error ? error.message : 'Failed to place order',
-        );
+        const errorMessage =
+          error instanceof Error ? error.message : "Failed to place order";
+        if (Platform.OS === "web") {
+          window.alert(`Error: ${errorMessage}`);
+        } else {
+          Alert.alert("Error", errorMessage);
+        }
       },
     });
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={styles.container} edges={["top"]}>
       {/* Header */}
       <View style={styles.header}>
         <Pressable style={styles.backButton} onPress={() => router.back()}>
           <IconArrowLeft size={24} color={colors.gray[800]} strokeWidth={1.5} />
         </Pressable>
-        <Text style={styles.title}>{t('checkout.checkout')}</Text>
+        <Text style={styles.title}>{t("checkout.checkout")}</Text>
         <View style={{ width: 44 }} />
       </View>
 
@@ -104,9 +151,15 @@ export default function CheckoutScreen() {
         <Card style={styles.section}>
           <View style={styles.sectionHeader}>
             <View style={styles.sectionIconContainer}>
-              <IconMapPin size={20} color={colors.primary[600]} strokeWidth={1.5} />
+              <IconMapPin
+                size={20}
+                color={colors.primary[600]}
+                strokeWidth={1.5}
+              />
             </View>
-            <Text style={styles.sectionTitle}>{t('checkout.pickupAddress')}</Text>
+            <Text style={styles.sectionTitle}>
+              {t("checkout.pickupAddress")}
+            </Text>
           </View>
           <Input
             value={pickupAddress}
@@ -122,16 +175,25 @@ export default function CheckoutScreen() {
         <Card style={styles.section}>
           <View style={styles.sectionHeader}>
             <View style={styles.sectionIconContainer}>
-              <IconMapPin size={20} color={colors.primary[600]} strokeWidth={1.5} />
+              <IconMapPin
+                size={20}
+                color={colors.primary[600]}
+                strokeWidth={1.5}
+              />
             </View>
-            <Text style={styles.sectionTitle}>{t('checkout.deliveryAddress')}</Text>
+            <Text style={styles.sectionTitle}>
+              {t("checkout.deliveryAddress")}
+            </Text>
           </View>
           <View style={styles.switchRow}>
-            <Text style={styles.switchLabel}>{t('checkout.sameAsPickup')}</Text>
+            <Text style={styles.switchLabel}>{t("checkout.sameAsPickup")}</Text>
             <Switch
               value={sameAsPickup}
               onValueChange={setSameAsPickup}
-              trackColor={{ true: colors.primary[600], false: colors.gray[300] }}
+              trackColor={{
+                true: colors.primary[600],
+                false: colors.gray[300],
+              }}
               thumbColor="#FFFFFF"
             />
           </View>
@@ -151,9 +213,13 @@ export default function CheckoutScreen() {
         <Card style={styles.section}>
           <View style={styles.sectionHeader}>
             <View style={styles.sectionIconContainer}>
-              <IconFileText size={20} color={colors.primary[600]} strokeWidth={1.5} />
+              <IconFileText
+                size={20}
+                color={colors.primary[600]}
+                strokeWidth={1.5}
+              />
             </View>
-            <Text style={styles.sectionTitle}>{t('checkout.addNote')}</Text>
+            <Text style={styles.sectionTitle}>{t("checkout.addNote")}</Text>
           </View>
           <Input
             value={notes}
@@ -185,15 +251,15 @@ export default function CheckoutScreen() {
           </View>
           <View style={styles.divider} />
           <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>{t('cart.itemTotal')}</Text>
+            <Text style={styles.summaryLabel}>{t("cart.itemTotal")}</Text>
             <Text style={styles.summaryValue}>৳{itemsTotal}</Text>
           </View>
           <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>{t('cart.deliveryCharge')}</Text>
+            <Text style={styles.summaryLabel}>{t("cart.deliveryCharge")}</Text>
             <Text style={styles.summaryValue}>৳{deliveryCharge}</Text>
           </View>
           <View style={[styles.summaryRow, styles.totalRow]}>
-            <Text style={styles.totalLabel}>{t('cart.grandTotal')}</Text>
+            <Text style={styles.totalLabel}>{t("cart.grandTotal")}</Text>
             <Text style={styles.totalValue}>৳{grandTotal}</Text>
           </View>
         </Card>
@@ -206,7 +272,7 @@ export default function CheckoutScreen() {
           <Text style={styles.bottomTotal}>৳{grandTotal}</Text>
         </View>
         <Button
-          title={t('checkout.placeOrder')}
+          title={t("checkout.placeOrder")}
           onPress={handlePlaceOrder}
           loading={createOrderMutation.isPending}
           size="lg"
@@ -222,9 +288,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background.secondary,
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
     backgroundColor: colors.background.primary,
@@ -236,26 +302,26 @@ const styles = StyleSheet.create({
     height: 44,
     borderRadius: borderRadius.lg,
     backgroundColor: colors.gray[50],
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   title: {
     fontSize: fontSize.lg,
-    fontWeight: '700',
+    fontWeight: "700",
     color: colors.gray[900],
   },
   content: {
     flex: 1,
   },
   scrollContent: {
-    padding: spacing['2xl'],
+    padding: spacing["2xl"],
   },
   section: {
     marginBottom: spacing.lg,
   },
   sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: spacing.md,
     marginBottom: spacing.lg,
   },
@@ -264,41 +330,41 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: borderRadius.lg,
     backgroundColor: colors.primary[50],
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   sectionTitle: {
     fontSize: fontSize.md,
-    fontWeight: '700',
+    fontWeight: "700",
     color: colors.gray[900],
   },
   inputContainer: {
     marginBottom: 0,
   },
   switchRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: spacing.md,
     paddingVertical: spacing.sm,
   },
   switchLabel: {
     fontSize: fontSize.md,
     color: colors.gray[700],
-    fontWeight: '500',
+    fontWeight: "500",
   },
   summaryItems: {
     marginTop: spacing.md,
   },
   summaryItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: spacing.sm,
   },
   summaryItemInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: spacing.sm,
   },
   summaryItemName: {
@@ -308,7 +374,7 @@ const styles = StyleSheet.create({
   summaryItemPrice: {
     fontSize: fontSize.sm,
     color: colors.gray[800],
-    fontWeight: '600',
+    fontWeight: "600",
   },
   divider: {
     height: 1,
@@ -316,8 +382,8 @@ const styles = StyleSheet.create({
     marginVertical: spacing.lg,
   },
   summaryRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: spacing.sm,
   },
   summaryLabel: {
@@ -327,7 +393,7 @@ const styles = StyleSheet.create({
   summaryValue: {
     fontSize: fontSize.md,
     color: colors.gray[800],
-    fontWeight: '500',
+    fontWeight: "500",
   },
   totalRow: {
     paddingTop: spacing.md,
@@ -338,19 +404,19 @@ const styles = StyleSheet.create({
   },
   totalLabel: {
     fontSize: fontSize.lg,
-    fontWeight: '700',
+    fontWeight: "700",
     color: colors.gray[900],
   },
   totalValue: {
     fontSize: fontSize.xl,
-    fontWeight: '700',
+    fontWeight: "700",
     color: colors.primary[600],
   },
   bottomBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: spacing['2xl'],
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: spacing["2xl"],
     backgroundColor: colors.background.primary,
     borderTopWidth: 1,
     borderTopColor: colors.gray[100],
@@ -360,11 +426,11 @@ const styles = StyleSheet.create({
   bottomLabel: {
     fontSize: fontSize.sm,
     color: colors.gray[500],
-    fontWeight: '500',
+    fontWeight: "500",
   },
   bottomTotal: {
     fontSize: fontSize.xl,
-    fontWeight: '700',
+    fontWeight: "700",
     color: colors.gray[900],
   },
 });
