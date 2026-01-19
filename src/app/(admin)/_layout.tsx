@@ -18,8 +18,8 @@ export default function AdminLayout() {
   const insets = useSafeAreaInsets();
 
   // Calculate bottom padding based on platform and safe area
-  const bottomPadding = Platform.OS === 'web' ? Math.max(insets.bottom, 28) : Math.max(insets.bottom, 8);
-  const tabBarHeight = Platform.OS === 'web' ? 70 + bottomPadding : 49 + bottomPadding;
+  const bottomPadding = Platform.OS === 'web' ? Math.max(insets.bottom, 0) : Math.max(insets.bottom, 8);
+  const tabBarHeight = Platform.OS === 'web' ? 68 + bottomPadding : 49 + bottomPadding;
 
   return (
     <Tabs
