@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 
 const KEYS = {
@@ -7,6 +8,33 @@ const KEYS = {
 } as const;
 
 /**
+ * Platform-aware storage adapter.
+ * Uses SecureStore on native (iOS/Android) and localStorage on web.
+ */
+const storageAdapter = {
+  getItem: async (key: string): Promise<string | null> => {
+    if (Platform.OS === 'web') {
+      return localStorage.getItem(key);
+    }
+    return SecureStore.getItemAsync(key);
+  },
+  setItem: async (key: string, value: string): Promise<void> => {
+    if (Platform.OS === 'web') {
+      localStorage.setItem(key, value);
+      return;
+    }
+    await SecureStore.setItemAsync(key, value);
+  },
+  deleteItem: async (key: string): Promise<void> => {
+    if (Platform.OS === 'web') {
+      localStorage.removeItem(key);
+      return;
+    }
+    await SecureStore.deleteItemAsync(key);
+  },
+};
+
+/**
  * Secure storage wrapper for sensitive data.
  */
 export const storage = {
@@ -14,35 +42,35 @@ export const storage = {
    * Save auth token.
    */
   async saveToken(token: string): Promise<void> {
-    await SecureStore.setItemAsync(KEYS.TOKEN, token);
+    await storageAdapter.setItem(KEYS.TOKEN, token);
   },
 
   /**
    * Get auth token.
    */
   async getToken(): Promise<string | null> {
-    return SecureStore.getItemAsync(KEYS.TOKEN);
+    return storageAdapter.getItem(KEYS.TOKEN);
   },
 
   /**
    * Remove auth token.
    */
   async removeToken(): Promise<void> {
-    await SecureStore.deleteItemAsync(KEYS.TOKEN);
+    await storageAdapter.deleteItem(KEYS.TOKEN);
   },
 
   /**
    * Save user data.
    */
   async saveUser(user: object): Promise<void> {
-    await SecureStore.setItemAsync(KEYS.USER, JSON.stringify(user));
+    await storageAdapter.setItem(KEYS.USER, JSON.stringify(user));
   },
 
   /**
    * Get user data.
    */
   async getUser<T>(): Promise<T | null> {
-    const data = await SecureStore.getItemAsync(KEYS.USER);
+    const data = await storageAdapter.getItem(KEYS.USER);
     return data ? JSON.parse(data) : null;
   },
 
@@ -50,21 +78,21 @@ export const storage = {
    * Remove user data.
    */
   async removeUser(): Promise<void> {
-    await SecureStore.deleteItemAsync(KEYS.USER);
+    await storageAdapter.deleteItem(KEYS.USER);
   },
 
   /**
    * Save language preference.
    */
   async saveLanguage(lang: string): Promise<void> {
-    await SecureStore.setItemAsync(KEYS.LANGUAGE, lang);
+    await storageAdapter.setItem(KEYS.LANGUAGE, lang);
   },
 
   /**
    * Get language preference.
    */
   async getLanguage(): Promise<string | null> {
-    return SecureStore.getItemAsync(KEYS.LANGUAGE);
+    return storageAdapter.getItem(KEYS.LANGUAGE);
   },
 
   /**
@@ -72,8 +100,8 @@ export const storage = {
    */
   async clearAll(): Promise<void> {
     await Promise.all([
-      SecureStore.deleteItemAsync(KEYS.TOKEN),
-      SecureStore.deleteItemAsync(KEYS.USER),
+      storageAdapter.deleteItem(KEYS.TOKEN),
+      storageAdapter.deleteItem(KEYS.USER),
     ]);
   },
 };

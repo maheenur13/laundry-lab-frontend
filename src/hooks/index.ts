@@ -7,6 +7,9 @@ export {
   useLogout,
 } from './useAuth';
 
+// Responsive hooks
+export { useResponsive } from './useResponsive';
+
 // Catalog hooks
 export {
   useClothingItems,

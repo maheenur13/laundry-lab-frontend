@@ -5,10 +5,11 @@ import { GluestackUIProvider } from '@gluestack-ui/themed';
 import { config } from '@gluestack-ui/config';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { useColorScheme, View, ActivityIndicator, StyleSheet } from 'react-native';
+import { useColorScheme, View, ActivityIndicator, StyleSheet, Platform } from 'react-native';
 import { queryClient } from '../lib/queryClient';
 import { useAuthStore } from '../stores/authStore';
 import { UserRole } from '../types/user';
+import { colors, layout, shadows } from '../constants/theme';
 import '../i18n';
 
 /**
@@ -63,11 +64,22 @@ export default function RootLayout() {
     }
   }, [isAuthenticated, isLoading, isNewUser, user, segments]);
 
+  const isWeb = Platform.OS === 'web';
+
   // Show loading screen while initializing
   if (isLoading) {
+    if (isWeb) {
+      return (
+        <View style={styles.webWrapper}>
+          <View style={[styles.webContent, styles.loadingContainer]}>
+            <ActivityIndicator size="large" color={colors.primary[600]} />
+          </View>
+        </View>
+      );
+    }
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#10B981" />
+        <ActivityIndicator size="large" color={colors.primary[600]} />
       </View>
     );
   }
@@ -77,17 +89,35 @@ export default function RootLayout() {
       <QueryClientProvider client={queryClient}>
         <GluestackUIProvider config={config} colorMode={colorScheme === 'dark' ? 'dark' : 'light'}>
           <StatusBar style={colorScheme === 'dark' ? 'dark' : 'dark'} />
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              animation: 'slide_from_right',
-            }}
-          >
-            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-            <Stack.Screen name="(customer)" options={{ headerShown: false }} />
-            <Stack.Screen name="(delivery)" options={{ headerShown: false }} />
-            <Stack.Screen name="(admin)" options={{ headerShown: false }} />
-          </Stack>
+          {isWeb ? (
+            <View style={styles.webWrapper}>
+              <View style={styles.webContent}>
+                <Stack
+                  screenOptions={{
+                    headerShown: false,
+                    animation: 'slide_from_right',
+                  }}
+                >
+                  <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+                  <Stack.Screen name="(customer)" options={{ headerShown: false }} />
+                  <Stack.Screen name="(delivery)" options={{ headerShown: false }} />
+                  <Stack.Screen name="(admin)" options={{ headerShown: false }} />
+                </Stack>
+              </View>
+            </View>
+          ) : (
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                animation: 'slide_from_right',
+              }}
+            >
+              <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+              <Stack.Screen name="(customer)" options={{ headerShown: false }} />
+              <Stack.Screen name="(delivery)" options={{ headerShown: false }} />
+              <Stack.Screen name="(admin)" options={{ headerShown: false }} />
+            </Stack>
+          )}
         </GluestackUIProvider>
       </QueryClientProvider>
     </SafeAreaProvider>
@@ -100,5 +130,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
+  },
+  webWrapper: {
+    flex: 1,
+    alignItems: 'center',
+    backgroundColor: colors.gray[100],
+    minHeight: '100%',
+  },
+  webContent: {
+    flex: 1,
+    width: '100%',
+    maxWidth: layout.maxContentWidth,
+    backgroundColor: colors.background.primary,
+    minHeight: '100%',
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderColor: colors.gray[200],
+    ...shadows.xl,
   },
 });

@@ -162,3 +162,19 @@ export const animation = {
   normal: 250,
   slow: 350,
 } as const;
+
+// Responsive breakpoints for web
+export const breakpoints = {
+  sm: 640,   // Mobile landscape
+  md: 768,   // Tablet
+  lg: 1024,  // Small laptop
+  xl: 1280,  // Desktop
+  '2xl': 1536, // Large desktop
+} as const;
+
+// Max content width for web (mobile-first design)
+export const layout = {
+  maxContentWidth: 480, // Max width for mobile content on web
+  maxTabletWidth: 768,  // Max width for tablet layout
+  sidebarWidth: 280,    // Sidebar width for desktop
+} as const;
