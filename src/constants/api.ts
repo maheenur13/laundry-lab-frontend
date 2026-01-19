@@ -36,31 +36,31 @@ if (__DEV__) {
   console.log('🔗 API Base URL:', API_BASE_URL);
 }
 
-// API endpoints - using '/core' prefix [[memory:5133302]]
+// API endpoints
 export const API_ENDPOINTS = {
   // Auth
-  REQUEST_OTP: '/core/auth/request-otp',
-  VERIFY_OTP: '/core/auth/verify-otp',
-  COMPLETE_SIGNUP: '/core/auth/complete-signup',
-  REFRESH_TOKEN: '/core/auth/refresh-token',
+  REQUEST_OTP: '/auth/request-otp',
+  VERIFY_OTP: '/auth/verify-otp',
+  COMPLETE_SIGNUP: '/auth/complete-signup',
+  REFRESH_TOKEN: '/auth/refresh-token',
 
   // Users
-  GET_PROFILE: '/core/users/me',
-  UPDATE_PROFILE: '/core/users/me',
+  GET_PROFILE: '/users/me',
+  UPDATE_PROFILE: '/users/me',
 
   // Catalog
-  CLOTHING_ITEMS: '/core/catalog/clothing-items',
-  SERVICES: '/core/catalog/services',
-  PRICING: '/core/catalog/pricing',
-  SEED_CATALOG: '/core/catalog/seed',
+  CLOTHING_ITEMS: '/catalog/clothing-items',
+  SERVICES: '/catalog/services',
+  PRICING: '/catalog/pricing',
+  SEED_CATALOG: '/catalog/seed',
 
   // Orders
-  CREATE_ORDER: '/core/orders',
-  MY_ORDERS: '/core/orders/my',
-  ASSIGNED_ORDERS: '/core/orders/assigned',
-  ALL_ORDERS: '/core/orders',
-  ORDER_STATS: '/core/orders/stats',
-  UNASSIGNED_ORDERS: '/core/orders/unassigned',
+  CREATE_ORDER: '/orders',
+  MY_ORDERS: '/orders/my',
+  ASSIGNED_ORDERS: '/orders/assigned',
+  ALL_ORDERS: '/orders',
+  ORDER_STATS: '/orders/stats',
+  UNASSIGNED_ORDERS: '/orders/unassigned',
 } as const;
 
 // Request timeout in milliseconds
