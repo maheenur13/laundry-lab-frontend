@@ -92,7 +92,6 @@ export default function AdminOrdersScreen() {
           data={statusFilters}
           horizontal
           showsHorizontalScrollIndicator={false}
-          estimatedItemSize={80}
           renderItem={({ item }) => (
             <Pressable
               style={[
@@ -126,7 +125,6 @@ export default function AdminOrdersScreen() {
         <FlashList
           data={orders}
           renderItem={renderOrder}
-          estimatedItemSize={120}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
         />

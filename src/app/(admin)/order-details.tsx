@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   ScrollView,
   Pressable,
   Alert,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -15,9 +16,11 @@ import {
   IconPhone,
   IconPackage,
   IconUser,
+  IconTruck,
+  IconUserPlus,
 } from '@tabler/icons-react-native';
 import { useTranslation } from 'react-i18next';
-import { Card, StatusBadge, LoadingState } from '../../components/ui';
+import { Card, StatusBadge, LoadingState, Button, AssignDeliveryModal } from '../../components/ui';
 import { useOrder } from '../../hooks';
 import { colors, spacing, fontSize, borderRadius } from '../../constants/theme';
 import { ServiceType } from '../../types/clothing';
@@ -29,6 +32,7 @@ export default function AdminOrderDetailsScreen() {
   const { t, i18n } = useTranslation();
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
+  const [showAssignModal, setShowAssignModal] = useState(false);
 
   const { data: currentOrder, isLoading } = useOrder(id || '');
   const lang = i18n.language as 'en' | 'bn';
@@ -61,6 +65,9 @@ export default function AdminOrderDetailsScreen() {
 
   const customer =
     typeof currentOrder.customer === 'object' ? currentOrder.customer : null;
+
+  const deliveryPerson =
+    typeof currentOrder.deliveryPerson === 'object' ? currentOrder.deliveryPerson : null;
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -104,6 +111,45 @@ export default function AdminOrderDetailsScreen() {
             </View>
           </Card>
         )}
+
+        {/* Delivery Person */}
+        <Card style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <View style={styles.sectionIconContainer}>
+              <IconTruck size={20} color={colors.primary[600]} strokeWidth={1.5} />
+            </View>
+            <Text style={styles.sectionTitle}>Delivery Person</Text>
+          </View>
+          {deliveryPerson ? (
+            <View>
+              <Text style={styles.customerName}>{deliveryPerson.fullName}</Text>
+              <View style={styles.phoneRow}>
+                <IconPhone size={14} color={colors.gray[400]} strokeWidth={1.5} />
+                <Text style={styles.phoneText}>{deliveryPerson.phoneNumber}</Text>
+              </View>
+              <Button
+                title="Change Assignment"
+                variant="outline"
+                size="sm"
+                onPress={() => setShowAssignModal(true)}
+                style={styles.assignButton}
+                icon={<IconUserPlus size={16} color={colors.primary[600]} strokeWidth={1.5} />}
+              />
+            </View>
+          ) : (
+            <View>
+              <Text style={styles.unassignedText}>No delivery person assigned</Text>
+              <Button
+                title="Assign Delivery Person"
+                variant="primary"
+                size="sm"
+                onPress={() => setShowAssignModal(true)}
+                style={styles.assignButton}
+                icon={<IconUserPlus size={16} color="#FFFFFF" strokeWidth={1.5} />}
+              />
+            </View>
+          )}
+        </Card>
 
         {/* Address */}
         <Card style={styles.section}>
@@ -182,6 +228,14 @@ export default function AdminOrderDetailsScreen() {
           </Card>
         )}
       </ScrollView>
+
+      {/* Assignment Modal */}
+      <AssignDeliveryModal
+        visible={showAssignModal}
+        onClose={() => setShowAssignModal(false)}
+        orderId={currentOrder.id}
+        currentDeliveryPerson={currentOrder.deliveryPerson}
+      />
     </SafeAreaView>
   );
 }
@@ -356,5 +410,15 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     lineHeight: 22,
     marginTop: spacing.sm,
+  },
+  unassignedText: {
+    fontSize: fontSize.md,
+    color: colors.gray[500],
+    fontStyle: 'italic',
+    marginBottom: spacing.md,
+  },
+  assignButton: {
+    marginTop: spacing.md,
+    alignSelf: 'flex-start',
   },
 });

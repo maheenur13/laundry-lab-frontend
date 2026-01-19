@@ -18,7 +18,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { Card, StatusBadge } from '../../components/ui';
 import { useAuthStore } from '../../stores/authStore';
-import { useAllOrders, useOrderStats } from '../../hooks';
+import { useAllOrders, useOrderStats, useUnassignedOrders } from '../../hooks';
 import { colors, spacing, fontSize, borderRadius, shadows } from '../../constants/theme';
 
 /**
@@ -30,6 +30,7 @@ export default function AdminDashboardScreen() {
   const { user } = useAuthStore();
   const { data: ordersData } = useAllOrders();
   const { data: stats } = useOrderStats();
+  const { data: unassignedOrders } = useUnassignedOrders();
 
   const orders = ordersData?.orders || [];
 
@@ -115,6 +116,45 @@ export default function AdminDashboardScreen() {
             </View>
           ))}
         </View>
+
+        {/* Unassigned Orders */}
+        {unassignedOrders && unassignedOrders.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>
+              Unassigned Orders ({unassignedOrders.length})
+            </Text>
+            {unassignedOrders.slice(0, 3).map((order) => (
+              <Card
+                key={order.id}
+                style={[styles.orderCard, styles.unassignedOrderCard]}
+                onPress={() =>
+                  router.push({
+                    pathname: '/(admin)/order-details',
+                    params: { id: order.id },
+                  })
+                }
+              >
+                <View style={styles.orderHeader}>
+                  <View style={styles.orderInfo}>
+                    <View style={[styles.orderIconContainer, styles.unassignedIcon]}>
+                      <IconPackage size={18} color={colors.warning} strokeWidth={1.5} />
+                    </View>
+                    <Text style={styles.orderId}>#{order.id.slice(-8)}</Text>
+                  </View>
+                  <StatusBadge status={order.status} size="sm" />
+                </View>
+                <View style={styles.orderDetails}>
+                  <Text style={styles.orderItems}>
+                    {order.items.length} item(s) • Needs assignment
+                  </Text>
+                  <Text style={styles.orderTotal}>
+                    ৳{order.pricing.grandTotal}
+                  </Text>
+                </View>
+              </Card>
+            ))}
+          </View>
+        )}
 
         {/* Recent Orders */}
         <View style={styles.section}>
@@ -312,5 +352,12 @@ const styles = StyleSheet.create({
     fontSize: fontSize.lg,
     fontWeight: '700',
     color: colors.primary[600],
+  },
+  unassignedOrderCard: {
+    borderLeftWidth: 4,
+    borderLeftColor: colors.warning,
+  },
+  unassignedIcon: {
+    backgroundColor: colors.warningLight,
   },
 });

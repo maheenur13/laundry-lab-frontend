@@ -1,20 +1,36 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { api } from '../lib/axios';
-import { API_ENDPOINTS } from '../constants/api';
-import { Order, CreateOrderRequest, OrderStats } from '../types/order';
-import { OrderStatus } from '../constants/orderStatus';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { api } from "../lib/axios";
+import { API_ENDPOINTS } from "../constants/api";
+import { Order, CreateOrderRequest, OrderStats } from "../types/order";
+import { OrderStatus } from "../constants/orderStatus";
+import { User } from "../types/user";
 
 // Query keys
 export const orderKeys = {
-  all: ['orders'] as const,
-  myOrders: () => [...orderKeys.all, 'my'] as const,
-  assignedOrders: () => [...orderKeys.all, 'assigned'] as const,
+  all: ["orders"] as const,
+  myOrders: () => [...orderKeys.all, "my"] as const,
+  assignedOrders: () => [...orderKeys.all, "assigned"] as const,
   allOrders: (status?: OrderStatus, page?: number) =>
-    [...orderKeys.all, 'all', status, page] as const,
-  detail: (id: string) => [...orderKeys.all, 'detail', id] as const,
-  stats: () => [...orderKeys.all, 'stats'] as const,
-  unassigned: () => [...orderKeys.all, 'unassigned'] as const,
+    [...orderKeys.all, "all", status, page] as const,
+  detail: (id: string) => [...orderKeys.all, "detail", id] as const,
+  stats: () => [...orderKeys.all, "stats"] as const,
+  unassigned: () => [...orderKeys.all, "unassigned"] as const,
 };
+
+export const userKeys = {
+  all: ["users"] as const,
+  deliveryPersonnel: () => [...userKeys.all, "delivery-personnel"] as const,
+};
+
+/**
+ * Hook for fetching delivery personnel (admin).
+ */
+export function useDeliveryPersonnel() {
+  return useQuery({
+    queryKey: userKeys.deliveryPersonnel(),
+    queryFn: () => api.get<User[]>(API_ENDPOINTS.GET_DELIVERY_PERSONNEL),
+  });
+}
 
 /**
  * Hook for fetching customer's orders.
@@ -129,10 +145,7 @@ export function useUpdateOrderStatus() {
       }),
     onSuccess: (updatedOrder, { orderId }) => {
       // Update the order in cache
-      queryClient.setQueryData<Order>(
-        orderKeys.detail(orderId),
-        updatedOrder,
-      );
+      queryClient.setQueryData<Order>(orderKeys.detail(orderId), updatedOrder);
       // Invalidate lists
       queryClient.invalidateQueries({ queryKey: orderKeys.myOrders() });
       queryClient.invalidateQueries({ queryKey: orderKeys.assignedOrders() });
@@ -159,10 +172,7 @@ export function useAssignDelivery() {
       }),
     onSuccess: (updatedOrder, { orderId }) => {
       // Update the order in cache
-      queryClient.setQueryData<Order>(
-        orderKeys.detail(orderId),
-        updatedOrder,
-      );
+      queryClient.setQueryData<Order>(orderKeys.detail(orderId), updatedOrder);
       // Invalidate lists
       queryClient.invalidateQueries({ queryKey: orderKeys.all });
     },

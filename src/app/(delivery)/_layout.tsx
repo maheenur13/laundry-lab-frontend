@@ -18,7 +18,7 @@ export default function DeliveryLayout() {
 
   // Calculate bottom padding based on platform and safe area
   const bottomPadding = Platform.OS === 'web' ? Math.max(insets.bottom, 0) : Math.max(insets.bottom, 8);
-  const tabBarHeight = Platform.OS === 'web' ? 70 + bottomPadding : 49 + bottomPadding;
+  const tabBarHeight = Platform.OS === 'web' ? 68 + bottomPadding : 49 + bottomPadding;
 
   return (
     <Tabs
@@ -27,11 +27,12 @@ export default function DeliveryLayout() {
         tabBarActiveTintColor: colors.primary[600],
         tabBarInactiveTintColor: colors.gray[400],
         tabBarStyle: {
+          shadowColor: 'transparent',
           backgroundColor: colors.background.primary,
           borderTopWidth: 1,
           borderTopColor: colors.gray[100],
           paddingTop: 8,
-          paddingBottom: bottomPadding,
+          marginBottom: bottomPadding,
           height: tabBarHeight,
         },
         tabBarLabelStyle: {
