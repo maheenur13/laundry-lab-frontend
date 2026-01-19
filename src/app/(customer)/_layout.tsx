@@ -19,7 +19,9 @@ export default function CustomerLayout() {
 
   // Calculate bottom padding based on platform and safe area
 
-  // const tabBarHeight = Platform.OS === 'web' ? 70 + bottomPadding : 49 + bottomPadding;
+  const bottomPadding = Platform.OS === 'web' ? Math.max(insets.bottom, 0) : Math.max(insets.bottom, 8);
+  const tabBarHeight = Platform.OS === 'web' ? 68 + bottomPadding : 49 + bottomPadding;
+
 
   return (
     <Tabs
@@ -35,9 +37,8 @@ export default function CustomerLayout() {
           borderTopWidth: 1,
           borderTopColor: colors.gray[100],
           paddingTop: 8,
-          marginBottom: insets.bottom
-          // paddingBottom: bottomPadding,
-          // height: insets.bottom + 60,
+          marginBottom: bottomPadding,
+          height: tabBarHeight,
         },
         tabBarLabelStyle: {
           fontSize: fontSize.xs,

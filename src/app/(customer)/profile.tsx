@@ -88,6 +88,7 @@ export default function ProfileScreen() {
       },
     },
   ];
+  console.log({ user });
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -111,13 +112,21 @@ export default function ProfileScreen() {
           <Text style={styles.userName}>{user?.fullName}</Text>
           <View style={styles.userInfoContainer}>
             <View style={styles.infoRow}>
-              <IconPhone size={16} color={colors.gray[400]} strokeWidth={1.5} />
-              <Text style={styles.infoText}>{user?.phoneNumber}</Text>
+              <View>
+                <IconPhone size={16} color={colors.gray[400]} strokeWidth={1.5} />
+              </View>
+              <View>
+                <Text style={styles.infoText}>{user?.phoneNumber} </Text>
+              </View>
             </View>
             {user?.address && (
               <View style={styles.infoRow}>
-                <IconMapPin size={16} color={colors.gray[400]} strokeWidth={1.5} />
-                <Text style={styles.infoText} numberOfLines={2}>{user.address}</Text>
+                <View>
+                  <IconMapPin size={16} color={colors.gray[400]} strokeWidth={1.5} />
+                </View>
+                <View>
+                  <Text style={styles.infoText} numberOfLines={2}>{user.address}</Text>
+                </View>
               </View>
             )}
           </View>

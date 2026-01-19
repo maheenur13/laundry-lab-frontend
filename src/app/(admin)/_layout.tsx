@@ -18,7 +18,7 @@ export default function AdminLayout() {
   const insets = useSafeAreaInsets();
 
   // Calculate bottom padding based on platform and safe area
-  const bottomPadding = Platform.OS === 'web' ? Math.max(insets.bottom, 0) : Math.max(insets.bottom, 8);
+  const bottomPadding = Platform.OS === 'web' ? Math.max(insets.bottom, 0) : Math.max(insets.bottom, 0);
   const tabBarHeight = Platform.OS === 'web' ? 68 + bottomPadding : 49 + bottomPadding;
 
   return (
@@ -28,12 +28,14 @@ export default function AdminLayout() {
         tabBarActiveTintColor: colors.primary[600],
         tabBarInactiveTintColor: colors.gray[400],
         tabBarStyle: {
+          shadowColor: 'transparent',
           backgroundColor: colors.background.primary,
           borderTopWidth: 1,
           borderTopColor: colors.gray[100],
-          paddingTop: 8,
-          paddingBottom: bottomPadding,
-          height: tabBarHeight,
+          paddingTop: 4,
+          marginBottom: bottomPadding,
+          height: tabBarHeight + 2,
+          // paddingBottom: 50
         },
         tabBarLabelStyle: {
           fontSize: fontSize.xs,
