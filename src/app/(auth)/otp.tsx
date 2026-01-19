@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Alert,
   Pressable,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -134,11 +135,19 @@ export default function OtpScreen() {
           setOtp(Array(OTP_LENGTH).fill(''));
 
           if (result.otp) {
-            Alert.alert('Development OTP', `Your new OTP is: ${result.otp}`);
+            if (Platform.OS === 'web') {
+              window.alert(`Development OTP: ${result.otp}`);
+            } else {
+              Alert.alert('Development OTP', `Your new OTP is: ${result.otp}`);
+            }
           }
         },
         onError: () => {
-          Alert.alert('Error', 'Failed to resend OTP');
+          if (Platform.OS === 'web') {
+            window.alert('Failed to resend OTP');
+          } else {
+            Alert.alert('Error', 'Failed to resend OTP');
+          }
         },
       },
     );
