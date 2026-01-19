@@ -1,5 +1,6 @@
 import { Tabs } from 'expo-router';
 import { Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   IconHome,
   IconHanger,
@@ -14,6 +15,11 @@ import { colors, fontSize } from '../../constants/theme';
  */
 export default function CustomerLayout() {
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
+
+  // Calculate bottom padding based on platform and safe area
+
+  // const tabBarHeight = Platform.OS === 'web' ? 70 + bottomPadding : 49 + bottomPadding;
 
   return (
     <Tabs
@@ -22,18 +28,20 @@ export default function CustomerLayout() {
         tabBarActiveTintColor: colors.primary[600],
         tabBarInactiveTintColor: colors.gray[400],
         tabBarStyle: {
+          shadowColor: 'transparent',
+          // shadowOpacity: 0,
+          boxShadow: 'none',
           backgroundColor: colors.background.primary,
           borderTopWidth: 1,
           borderTopColor: colors.gray[100],
           paddingTop: 8,
-          // Extra padding on web for mobile browser safe area
-          paddingBottom: Platform.OS === 'web' ? 20 : 8,
-          height: Platform.OS === 'web' ? 75 : 65,
+          marginBottom: insets.bottom
+          // paddingBottom: bottomPadding,
+          // height: insets.bottom + 60,
         },
         tabBarLabelStyle: {
           fontSize: fontSize.xs,
           fontWeight: '600',
-          marginTop: 4,
         },
       }}
     >

@@ -6,8 +6,10 @@ import {
   ScrollView,
   Pressable,
   Alert,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 import {
   IconMapPin,
   IconPhone,
@@ -28,6 +30,7 @@ import { colors, spacing, fontSize, borderRadius, shadows } from '../../constant
  */
 export default function ProfileScreen() {
   const { t, i18n } = useTranslation();
+  const router = useRouter();
   const { user } = useAuthStore();
   const logoutMutation = useLogout();
 
@@ -36,19 +39,34 @@ export default function ProfileScreen() {
     i18n.changeLanguage(newLang);
   };
 
+  const performLogout = () => {
+    logoutMutation.mutate(undefined, {
+      onSuccess: () => {
+        router.replace('/(auth)/login');
+      },
+    });
+  };
+
   const handleLogout = () => {
-    Alert.alert(
-      t('auth.logout'),
-      'Are you sure you want to logout?',
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('auth.logout'),
-          style: 'destructive',
-          onPress: () => logoutMutation.mutate(),
-        },
-      ],
-    );
+    if (Platform.OS === 'web') {
+      const confirmed = window.confirm('Are you sure you want to logout?');
+      if (confirmed) {
+        performLogout();
+      }
+    } else {
+      Alert.alert(
+        t('auth.logout'),
+        'Are you sure you want to logout?',
+        [
+          { text: t('common.cancel'), style: 'cancel' },
+          {
+            text: t('auth.logout'),
+            style: 'destructive',
+            onPress: performLogout,
+          },
+        ],
+      );
+    }
   };
 
   const menuItems = [
@@ -61,7 +79,13 @@ export default function ProfileScreen() {
     {
       icon: IconInfoCircle,
       label: t('profile.about'),
-      onPress: () => Alert.alert('LaundryBD', 'Version 1.0.0'),
+      onPress: () => {
+        if (Platform.OS === 'web') {
+          window.alert('LaundryBD - Version 1.0.0');
+        } else {
+          Alert.alert('LaundryBD', 'Version 1.0.0');
+        }
+      },
     },
   ];
 

@@ -12,6 +12,40 @@ import { UserRole } from '../types/user';
 import { colors, layout, shadows } from '../constants/theme';
 import '../i18n';
 
+// Inject CSS for proper mobile viewport height on web
+if (Platform.OS === 'web' && typeof document !== 'undefined') {
+  const style = document.createElement('style');
+  style.textContent = `
+    html, body {
+      height: 100% !important;
+      height: 100dvh !important;
+      min-height: 100% !important;
+      min-height: 100dvh !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+    #root {
+      height: 100% !important;
+      min-height: 100% !important;
+      min-height: 100dvh !important;
+      display: flex !important;
+      flex-direction: column !important;
+    }
+    #root > div {
+      flex: 1 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      min-height: 100% !important;
+      min-height: 100dvh !important;
+    }
+    /* Fix tab bar - prevent shrinking */
+    [role="tablist"] {
+      flex-shrink: 0 !important;
+    }
+  `;
+  document.head.appendChild(style);
+}
+
 /**
  * Root layout - handles providers and auth navigation.
  */
@@ -135,17 +169,16 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     backgroundColor: colors.gray[100],
-    minHeight: '100%',
   },
   webContent: {
     flex: 1,
     width: '100%',
     maxWidth: layout.maxContentWidth,
     backgroundColor: colors.background.primary,
-    minHeight: '100%',
     borderLeftWidth: 1,
     borderRightWidth: 1,
     borderColor: colors.gray[200],
+    paddingBottom: 12,
     ...shadows.xl,
   },
 });

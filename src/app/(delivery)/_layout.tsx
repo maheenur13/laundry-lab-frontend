@@ -1,5 +1,6 @@
 import { Tabs } from 'expo-router';
 import { Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   IconLayoutDashboard,
   IconPackage,
@@ -13,6 +14,11 @@ import { colors, fontSize } from '../../constants/theme';
  */
 export default function DeliveryLayout() {
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
+
+  // Calculate bottom padding based on platform and safe area
+  const bottomPadding = Platform.OS === 'web' ? Math.max(insets.bottom, 28) : Math.max(insets.bottom, 8);
+  const tabBarHeight = Platform.OS === 'web' ? 70 + bottomPadding : 49 + bottomPadding;
 
   return (
     <Tabs
@@ -25,9 +31,8 @@ export default function DeliveryLayout() {
           borderTopWidth: 1,
           borderTopColor: colors.gray[100],
           paddingTop: 8,
-          // Extra padding on web for mobile browser safe area
-          paddingBottom: Platform.OS === 'web' ? 20 : 8,
-          height: Platform.OS === 'web' ? 75 : 65,
+          paddingBottom: bottomPadding,
+          height: tabBarHeight,
         },
         tabBarLabelStyle: {
           fontSize: fontSize.xs,
