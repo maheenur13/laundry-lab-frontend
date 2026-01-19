@@ -1,4 +1,5 @@
 import { Tabs } from 'expo-router';
+import { Platform } from 'react-native';
 import {
   IconLayoutDashboard,
   IconPackage,
@@ -25,8 +26,9 @@ export default function AdminLayout() {
           borderTopWidth: 1,
           borderTopColor: colors.gray[100],
           paddingTop: 8,
-          paddingBottom: 8,
-          height: 65,
+          // Extra padding on web for mobile browser safe area
+          paddingBottom: Platform.OS === 'web' ? 20 : 8,
+          height: Platform.OS === 'web' ? 75 : 65,
         },
         tabBarLabelStyle: {
           fontSize: fontSize.xs,
