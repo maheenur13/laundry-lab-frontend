@@ -154,6 +154,33 @@ export default function DeliveryOrderDetailsScreen() {
     console.log('🚨 Confirmation dialog called');
   };
 
+  const handleGoBack = () => {
+    console.log('🔙 Back button pressed');
+
+    // For web, check if there's a referrer from the same domain
+    if (Platform.OS === 'web') {
+      const referrer = document.referrer;
+      const currentDomain = window.location.origin;
+
+      console.log('- referrer:', referrer);
+      console.log('- currentDomain:', currentDomain);
+
+      if (referrer && referrer.startsWith(currentDomain)) {
+        // User came from within the app, safe to go back
+        console.log('- User came from within app, using router.back()');
+        router.back();
+      } else {
+        // User came directly to this URL or from external site
+        console.log('- User came directly or from external site, redirecting to orders');
+        router.replace('/(delivery)/orders');
+      }
+    } else {
+      // On mobile, router.back() should work fine
+      console.log('- Mobile platform, using router.back()');
+      router.back();
+    }
+  };
+
   const handleCall = (phoneNumber: string) => {
     Linking.openURL(`tel:${phoneNumber}`);
   };
@@ -162,7 +189,7 @@ export default function DeliveryOrderDetailsScreen() {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
         <View style={styles.header}>
-          <Pressable style={styles.backButton} onPress={() => router.back()}>
+          <Pressable style={styles.backButton} onPress={handleGoBack}>
             <IconArrowLeft size={24} color={colors.gray[800]} strokeWidth={1.5} />
           </Pressable>
           <Text style={styles.title}>{t('orders.orderDetails')}</Text>
@@ -190,7 +217,7 @@ export default function DeliveryOrderDetailsScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
-        <Pressable style={styles.backButton} onPress={() => router.back()}>
+        <Pressable style={styles.backButton} onPress={handleGoBack}>
           <IconArrowLeft size={24} color={colors.gray[800]} strokeWidth={1.5} />
         </Pressable>
         <Text style={styles.title}>#{currentOrder.id.slice(-8)}</Text>
