@@ -33,8 +33,19 @@ export default function DeliveryOrderDetailsScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
 
-  const { data: currentOrder, isLoading } = useOrder(id || '');
+  // Debug logging to check if ID is being received
+  console.log('🔍 Order Details Debug:');
+  console.log('- id from params:', id);
+  console.log('- typeof id:', typeof id);
+  console.log('- id length:', id?.length);
+
+  const { data: currentOrder, isLoading, error } = useOrder(id || '');
   const updateStatusMutation = useUpdateOrderStatus();
+
+  // Debug logging for order data
+  console.log('- currentOrder:', currentOrder);
+  console.log('- isLoading:', isLoading);
+  console.log('- error:', error);
 
   const lang = i18n.language as 'en' | 'bn';
 

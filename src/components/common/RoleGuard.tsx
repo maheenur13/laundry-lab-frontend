@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
-import { useRouter, useSegments } from 'expo-router';
-import { View, ActivityIndicator } from 'react-native';
+import { useRouter, useSegments, useGlobalSearchParams } from 'expo-router';
+import { View, ActivityIndicator, Platform } from 'react-native';
 import { useAuthStore } from '../../stores/authStore';
 import { UserRole } from '../../types/user';
 import { colors } from '../../constants/theme';
@@ -16,6 +16,7 @@ interface RoleGuardProps {
 export function RoleGuard({ children }: RoleGuardProps) {
     const router = useRouter();
     const segments = useSegments();
+    const searchParams = useGlobalSearchParams();
     const { user, isAuthenticated, isLoading } = useAuthStore();
 
     useEffect(() => {
@@ -28,10 +29,42 @@ export function RoleGuard({ children }: RoleGuardProps) {
         const inAdminGroup = segments[0] === '(admin)';
         const isInValidRoleGroup = inAuthGroup || inCustomerGroup || inDeliveryGroup || inAdminGroup;
 
+        // Temporary debug logging to understand the issue
+        if (Platform.OS === 'web') {
+            console.log('🔍 RoleGuard Debug:');
+            console.log('- segments:', segments);
+            console.log('- searchParams:', searchParams);
+            console.log('- user role:', user?.role);
+            console.log('- isAuthenticated:', isAuthenticated);
+            console.log('- isInValidRoleGroup:', isInValidRoleGroup);
+        }
+
+        // Helper function to preserve query parameters during redirect
+        const redirectWithParams = (path: string) => {
+            if (Object.keys(searchParams).length > 0) {
+                // If we have query parameters, use router.push with the full URL
+                const queryString = '?' + new URLSearchParams(searchParams as Record<string, string>).toString();
+                const fullPath = path + queryString;
+
+                if (Platform.OS === 'web') {
+                    console.log('🔄 Redirecting to:', fullPath);
+                }
+
+                router.push(fullPath as any);
+            } else {
+                // No query parameters, use regular replace
+                if (Platform.OS === 'web') {
+                    console.log('🔄 Redirecting to:', path);
+                }
+
+                router.replace(path as any);
+            }
+        };
+
         // If not authenticated, redirect to login
         if (!isAuthenticated || !user) {
             if (!inAuthGroup) {
-                router.replace('/(auth)/login');
+                redirectWithParams('/(auth)/login');
             }
             return;
         }
@@ -46,7 +79,7 @@ export function RoleGuard({ children }: RoleGuardProps) {
                     userRole === UserRole.ADMIN ? '/(admin)/dashboard' :
                         '/(customer)/home';
 
-            router.replace(targetRoute);
+            redirectWithParams(targetRoute);
             return;
         }
 
@@ -61,7 +94,7 @@ export function RoleGuard({ children }: RoleGuardProps) {
                         userRole === UserRole.ADMIN ? '/(admin)/orders' :
                             '/(customer)/home';
 
-                router.replace(targetRoute);
+                redirectWithParams(targetRoute);
                 return;
             }
 
@@ -71,7 +104,7 @@ export function RoleGuard({ children }: RoleGuardProps) {
                         userRole === UserRole.ADMIN ? '/(admin)/order-details' :
                             '/(customer)/home';
 
-                router.replace(targetRoute);
+                redirectWithParams(targetRoute);
                 return;
             }
 
@@ -81,7 +114,7 @@ export function RoleGuard({ children }: RoleGuardProps) {
                         userRole === UserRole.ADMIN ? '/(admin)/dashboard' :
                             '/(customer)/home';
 
-                router.replace(targetRoute);
+                redirectWithParams(targetRoute);
                 return;
             }
 
@@ -91,7 +124,7 @@ export function RoleGuard({ children }: RoleGuardProps) {
                         userRole === UserRole.ADMIN ? '/(admin)/profile' :
                             '/(customer)/profile';
 
-                router.replace(targetRoute);
+                redirectWithParams(targetRoute);
                 return;
             }
 
@@ -101,72 +134,75 @@ export function RoleGuard({ children }: RoleGuardProps) {
                     userRole === UserRole.ADMIN ? '/(admin)/dashboard' :
                         '/(customer)/home';
 
-            router.replace(targetRoute);
+            redirectWithParams(targetRoute);
             return;
         }
 
         // Prevent role-based route violations with context preservation
         if (userRole === UserRole.CUSTOMER && (inDeliveryGroup || inAdminGroup)) {
-            router.replace('/(customer)/home');
+            redirectWithParams('/(customer)/home');
             return;
         }
 
         if (userRole === UserRole.DELIVERY && (inCustomerGroup || inAdminGroup)) {
             // Preserve page context when redirecting from admin routes
             if (inAdminGroup && segments[1] === 'orders') {
-                router.replace('/(delivery)/orders');
+                redirectWithParams('/(delivery)/orders');
                 return;
             }
 
             if (inAdminGroup && segments[1] === 'order-details') {
-                router.replace('/(delivery)/order-details');
+                redirectWithParams('/(delivery)/order-details');
                 return;
             }
 
             if (inAdminGroup && segments[1] === 'dashboard') {
-                router.replace('/(delivery)/dashboard');
+                redirectWithParams('/(delivery)/dashboard');
                 return;
             }
 
             if (inAdminGroup && segments[1] === 'profile') {
-                router.replace('/(delivery)/profile');
+                redirectWithParams('/(delivery)/profile');
                 return;
             }
 
             // Default fallback
-            router.replace('/(delivery)/dashboard');
+            redirectWithParams('/(delivery)/dashboard');
             return;
         }
 
         if (userRole === UserRole.ADMIN && (inCustomerGroup || inDeliveryGroup)) {
             // Preserve page context when redirecting from delivery routes
             if (inDeliveryGroup && segments[1] === 'orders') {
-                router.replace('/(admin)/orders');
+                redirectWithParams('/(admin)/orders');
                 return;
             }
 
             if (inDeliveryGroup && segments[1] === 'order-details') {
-                router.replace('/(admin)/order-details');
+                redirectWithParams('/(admin)/order-details');
                 return;
             }
 
             if (inDeliveryGroup && segments[1] === 'dashboard') {
-                router.replace('/(admin)/dashboard');
+                redirectWithParams('/(admin)/dashboard');
                 return;
             }
 
             if (inDeliveryGroup && segments[1] === 'profile') {
-                router.replace('/(admin)/profile');
+                redirectWithParams('/(admin)/profile');
                 return;
             }
 
             // Default fallback
-            router.replace('/(admin)/dashboard');
+            redirectWithParams('/(admin)/dashboard');
             return;
         }
 
         // User has valid access to current route
-    }, [isAuthenticated, user, segments, isLoading, router]);
+        if (Platform.OS === 'web') {
+            console.log('✅ User has valid access to current route');
+        }
+    }, [isAuthenticated, user, segments, searchParams, isLoading, router]);
 
     // Show loading spinner while auth is initializing
     if (isLoading) {
