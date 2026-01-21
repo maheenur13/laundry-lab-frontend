@@ -35,6 +35,24 @@ const storageAdapter = {
 };
 
 /**
+ * Get token synchronously (web only) - for immediate routing decisions.
+ * On mobile, returns null (use async getToken instead).
+ */
+export function getTokenSync(): string | null {
+  if (Platform.OS === 'web' && typeof localStorage !== 'undefined') {
+    return localStorage.getItem(KEYS.TOKEN);
+  }
+  return null;
+}
+
+/**
+ * Get token asynchronously (works on all platforms).
+ */
+export async function getToken(): Promise<string | null> {
+  return storageAdapter.getItem(KEYS.TOKEN);
+}
+
+/**
  * Secure storage wrapper for sensitive data.
  */
 export const storage = {

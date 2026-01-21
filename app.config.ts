@@ -1,7 +1,7 @@
 import { ExpoConfig, ConfigContext } from 'expo/config';
 
 // Load environment variables
-const API_URL_DEV = process.env.API_URL_DEV || 'http://192.168.0.102:3000/api/v1';
+const API_URL_DEV = process.env.API_URL_DEV || 'http://10.140.143.213:3000/api/v1';
 const API_URL_PROD = process.env.API_URL_PROD || 'https://laundry-lab-backend.onrender.com/api/v1';
 const API_URL_ANDROID_EMU = process.env.API_URL_ANDROID_EMU || 'http://10.0.2.2:3000/api/v1';
 

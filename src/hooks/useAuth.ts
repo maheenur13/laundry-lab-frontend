@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { api } from '../lib/axios';
 import { storage } from '../lib/storage';
 import { API_ENDPOINTS } from '../constants/api';
@@ -80,12 +80,8 @@ export function useVerifyOtp() {
       return response;
     },
     onSuccess: async (data) => {
-      // Save to storage
-      await storage.saveToken(data.accessToken);
-      await storage.saveUser(data.user);
-
-      // Update auth store
-      setAuth(data.user, data.accessToken);
+      // Update auth store (this also saves to storage)
+      await setAuth(data.user, data.accessToken);
       setIsNewUser(data.isNewUser);
     },
   });
@@ -106,12 +102,8 @@ export function useCompleteSignup() {
       return response;
     },
     onSuccess: async (data) => {
-      // Save to storage
-      await storage.saveToken(data.accessToken);
-      await storage.saveUser(data.user);
-
-      // Update auth store
-      setAuth(data.user, data.accessToken);
+      // Update auth store (this also saves to storage)
+      await setAuth(data.user, data.accessToken);
       setIsNewUser(false);
     },
   });
@@ -133,6 +125,35 @@ export function useUpdateProfile() {
       setUser(user);
     },
   });
+}
+
+/**
+ * Hook for fetching current user profile from backend.
+ */
+export function useGetProfile() {
+  const { isAuthenticated } = useAuthStore();
+
+  return useQuery({
+    queryKey: ['profile', 'me'],
+    queryFn: () => api.get<User>(API_ENDPOINTS.GET_PROFILE),
+    enabled: isAuthenticated,
+    retry: 1,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+}
+
+/**
+ * Hook for fetching current user profile (non-hook version for use in stores).
+ * This is a utility function that can be called outside of React components.
+ */
+export async function fetchUserProfile(): Promise<User | null> {
+  try {
+    const user = await api.get<User>(API_ENDPOINTS.GET_PROFILE);
+    return user;
+  } catch (error) {
+    console.error('Failed to fetch user profile:', error);
+    return null;
+  }
 }
 
 /**

@@ -3,7 +3,8 @@ import { api } from "../lib/axios";
 import { API_ENDPOINTS } from "../constants/api";
 import { Order, CreateOrderRequest, OrderStats } from "../types/order";
 import { OrderStatus } from "../constants/orderStatus";
-import { User } from "../types/user";
+import { User, UserRole } from "../types/user";
+import { useAuthStore } from "../stores/authStore";
 
 // Query keys
 export const orderKeys = {
@@ -26,9 +27,13 @@ export const userKeys = {
  * Hook for fetching delivery personnel (admin).
  */
 export function useDeliveryPersonnel() {
+  const { user } = useAuthStore();
+  const isAdmin = user?.role === UserRole.ADMIN;
+
   return useQuery({
     queryKey: userKeys.deliveryPersonnel(),
     queryFn: () => api.get<User[]>(API_ENDPOINTS.GET_DELIVERY_PERSONNEL),
+    enabled: isAdmin,
   });
 }
 
@@ -36,9 +41,13 @@ export function useDeliveryPersonnel() {
  * Hook for fetching customer's orders.
  */
 export function useMyOrders() {
+  const { user } = useAuthStore();
+  const isCustomer = user?.role === UserRole.CUSTOMER;
+
   return useQuery({
     queryKey: orderKeys.myOrders(),
     queryFn: () => api.get<Order[]>(API_ENDPOINTS.MY_ORDERS),
+    enabled: isCustomer,
   });
 }
 
@@ -46,9 +55,13 @@ export function useMyOrders() {
  * Hook for fetching orders assigned to delivery person.
  */
 export function useAssignedOrders() {
+  const { user } = useAuthStore();
+  const isDelivery = user?.role === UserRole.DELIVERY;
+
   return useQuery({
     queryKey: orderKeys.assignedOrders(),
     queryFn: () => api.get<Order[]>(API_ENDPOINTS.ASSIGNED_ORDERS),
+    enabled: isDelivery,
   });
 }
 
@@ -63,6 +76,9 @@ interface AllOrdersResponse {
  * Hook for fetching all orders (admin).
  */
 export function useAllOrders(status?: OrderStatus, page = 1) {
+  const { user } = useAuthStore();
+  const isAdmin = user?.role === UserRole.ADMIN;
+
   return useQuery({
     queryKey: orderKeys.allOrders(status, page),
     queryFn: () => {
@@ -70,6 +86,7 @@ export function useAllOrders(status?: OrderStatus, page = 1) {
       if (status) params.status = status;
       return api.get<AllOrdersResponse>(API_ENDPOINTS.ALL_ORDERS, params);
     },
+    enabled: isAdmin,
   });
 }
 
@@ -88,9 +105,13 @@ export function useOrder(orderId: string) {
  * Hook for fetching order statistics (admin).
  */
 export function useOrderStats() {
+  const { user } = useAuthStore();
+  const isAdmin = user?.role === UserRole.ADMIN;
+
   return useQuery({
     queryKey: orderKeys.stats(),
     queryFn: () => api.get<OrderStats>(API_ENDPOINTS.ORDER_STATS),
+    enabled: isAdmin,
   });
 }
 
@@ -98,9 +119,13 @@ export function useOrderStats() {
  * Hook for fetching unassigned orders (admin).
  */
 export function useUnassignedOrders() {
+  const { user } = useAuthStore();
+  const isAdmin = user?.role === UserRole.ADMIN;
+
   return useQuery({
     queryKey: orderKeys.unassigned(),
     queryFn: () => api.get<Order[]>(API_ENDPOINTS.UNASSIGNED_ORDERS),
+    enabled: isAdmin,
   });
 }
 

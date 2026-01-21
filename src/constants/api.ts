@@ -9,7 +9,7 @@ import Constants from "expo-constants";
 // Get environment variables from expo config
 const extra = Constants.expoConfig?.extra || {};
 
-const API_URL_DEV = extra.apiUrlDev || "http://192.168.0.102:3000/api/v1";
+const API_URL_DEV = extra.apiUrlDev || "http://10.140.143.213:3000/api/v1";
 const API_URL_PROD =
   extra.apiUrlProd || "https://laundry-lab-backend.onrender.com/api/v1";
 const API_URL_ANDROID_EMU =
