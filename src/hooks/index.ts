@@ -25,6 +25,8 @@ export {
 export {
   useMyOrders,
   useAssignedOrders,
+  useDeliveryHistory,
+  useDeliveryStats,
   useAllOrders,
   useOrder,
   useOrderStats,

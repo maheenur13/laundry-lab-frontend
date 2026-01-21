@@ -11,6 +11,8 @@ export const orderKeys = {
   all: ["orders"] as const,
   myOrders: () => [...orderKeys.all, "my"] as const,
   assignedOrders: () => [...orderKeys.all, "assigned"] as const,
+  deliveryHistory: () => [...orderKeys.all, "delivery-history"] as const,
+  deliveryStats: () => [...orderKeys.all, "delivery-stats"] as const,
   allOrders: (status?: OrderStatus, page?: number) =>
     [...orderKeys.all, "all", status, page] as const,
   detail: (id: string) => [...orderKeys.all, "detail", id] as const,
@@ -61,6 +63,45 @@ export function useAssignedOrders() {
   return useQuery({
     queryKey: orderKeys.assignedOrders(),
     queryFn: () => api.get<Order[]>(API_ENDPOINTS.ASSIGNED_ORDERS),
+    enabled: isDelivery,
+  });
+}
+
+/**
+ * Hook for fetching delivery history (completed orders).
+ */
+export function useDeliveryHistory() {
+  const { user } = useAuthStore();
+  const isDelivery = user?.role === UserRole.DELIVERY;
+
+  return useQuery({
+    queryKey: orderKeys.deliveryHistory(),
+    queryFn: () => api.get<Order[]>(API_ENDPOINTS.DELIVERY_HISTORY),
+    enabled: isDelivery,
+  });
+}
+
+interface DeliveryStats {
+  totalDeliveries: number;
+  completedDeliveries: number;
+  cancelledDeliveries: number;
+  todayDeliveries: number;
+  thisWeekDeliveries: number;
+  thisMonthDeliveries: number;
+  totalRevenue: number;
+  averageDeliveryTime: number;
+}
+
+/**
+ * Hook for fetching delivery statistics.
+ */
+export function useDeliveryStats() {
+  const { user } = useAuthStore();
+  const isDelivery = user?.role === UserRole.DELIVERY;
+
+  return useQuery({
+    queryKey: orderKeys.deliveryStats(),
+    queryFn: () => api.get<DeliveryStats>(API_ENDPOINTS.DELIVERY_STATS),
     enabled: isDelivery,
   });
 }

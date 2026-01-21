@@ -199,9 +199,6 @@ export function RoleGuard({ children }: RoleGuardProps) {
         }
 
         // User has valid access to current route
-        if (Platform.OS === 'web') {
-            console.log('✅ User has valid access to current route');
-        }
     }, [isAuthenticated, user, segments, searchParams, isLoading, router]);
 
     // Show loading spinner while auth is initializing

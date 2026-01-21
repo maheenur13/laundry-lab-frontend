@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   IconLayoutDashboard,
   IconPackage,
+  IconHistory,
   IconUser,
 } from '@tabler/icons-react-native';
 import { useTranslation } from 'react-i18next';
@@ -59,6 +60,16 @@ export default function DeliveryLayout() {
           tabBarLabel: 'Orders',
           tabBarIcon: ({ color, focused }) => (
             <IconPackage size={24} color={color} strokeWidth={focused ? 2 : 1.5} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="history"
+        options={{
+          title: t('delivery.history'),
+          tabBarLabel: 'History',
+          tabBarIcon: ({ color, focused }) => (
+            <IconHistory size={24} color={color} strokeWidth={focused ? 2 : 1.5} />
           ),
         }}
       />

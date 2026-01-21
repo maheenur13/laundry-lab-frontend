@@ -34,19 +34,8 @@ export default function DeliveryOrderDetailsScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
 
-  // Debug logging to check if ID is being received
-  console.log('🔍 Order Details Debug:');
-  console.log('- id from params:', id);
-  console.log('- typeof id:', typeof id);
-  console.log('- id length:', id?.length);
-
   const { data: currentOrder, isLoading, error } = useOrder(id || '');
   const updateStatusMutation = useUpdateOrderStatus();
-
-  // Debug logging for order data
-  console.log('- currentOrder:', currentOrder);
-  console.log('- isLoading:', isLoading);
-  console.log('- error:', error);
 
   const lang = i18n.language as 'en' | 'bn';
 
@@ -206,12 +195,6 @@ export default function DeliveryOrderDetailsScreen() {
   const nextStatusLabel = nextStatus
     ? ORDER_STATUS_CONFIG[nextStatus].label[lang]
     : null;
-
-  // Debug logging for button rendering
-  console.log('🔘 Button Debug:');
-  console.log('- nextStatus:', nextStatus);
-  console.log('- nextStatusLabel:', nextStatusLabel);
-  console.log('- should show button:', !!nextStatusLabel);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>

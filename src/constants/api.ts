@@ -61,6 +61,8 @@ export const API_ENDPOINTS = {
   CREATE_ORDER: "/orders",
   MY_ORDERS: "/orders/my",
   ASSIGNED_ORDERS: "/orders/assigned",
+  DELIVERY_HISTORY: "/orders/delivery/history",
+  DELIVERY_STATS: "/orders/delivery/stats",
   ALL_ORDERS: "/orders",
   ORDER_STATS: "/orders/stats",
   UNASSIGNED_ORDERS: "/orders/unassigned",
