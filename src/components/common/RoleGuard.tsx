@@ -65,6 +65,16 @@ export function RoleGuard({ children }: RoleGuardProps) {
                 return;
             }
 
+            if (directRoute === 'order-details') {
+                const targetRoute = userRole === UserRole.CUSTOMER ? '/(customer)/home' :
+                    userRole === UserRole.DELIVERY ? '/(delivery)/order-details' :
+                        userRole === UserRole.ADMIN ? '/(admin)/order-details' :
+                            '/(customer)/home';
+
+                router.replace(targetRoute);
+                return;
+            }
+
             if (directRoute === 'dashboard') {
                 const targetRoute = userRole === UserRole.CUSTOMER ? '/(customer)/home' :
                     userRole === UserRole.DELIVERY ? '/(delivery)/dashboard' :
@@ -108,6 +118,11 @@ export function RoleGuard({ children }: RoleGuardProps) {
                 return;
             }
 
+            if (inAdminGroup && segments[1] === 'order-details') {
+                router.replace('/(delivery)/order-details');
+                return;
+            }
+
             if (inAdminGroup && segments[1] === 'dashboard') {
                 router.replace('/(delivery)/dashboard');
                 return;
@@ -127,6 +142,11 @@ export function RoleGuard({ children }: RoleGuardProps) {
             // Preserve page context when redirecting from delivery routes
             if (inDeliveryGroup && segments[1] === 'orders') {
                 router.replace('/(admin)/orders');
+                return;
+            }
+
+            if (inDeliveryGroup && segments[1] === 'order-details') {
+                router.replace('/(admin)/order-details');
                 return;
             }
 
