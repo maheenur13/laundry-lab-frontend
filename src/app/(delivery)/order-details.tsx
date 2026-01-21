@@ -7,6 +7,7 @@ import {
   Pressable,
   Alert,
   Linking,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -64,44 +65,93 @@ export default function DeliveryOrderDetailsScreen() {
 
     if (!nextStatus) {
       console.log('❌ No next status available');
-      Alert.alert('Info', 'Order is already completed');
+      if (Platform.OS === 'web') {
+        window.alert('Order is already completed');
+      } else {
+        Alert.alert('Info', 'Order is already completed');
+      }
       return;
     }
 
     const statusLabel = ORDER_STATUS_CONFIG[nextStatus].label[lang];
     console.log('- status label:', statusLabel);
 
-    Alert.alert(
-      t('delivery.updateStatus'),
-      `Mark order as "${statusLabel}"?`,
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('common.confirm'),
-          onPress: () => {
-            console.log('🚀 Confirming status update');
-            updateStatusMutation.mutate(
-              { orderId: currentOrder.id, status: nextStatus },
-              {
-                onSuccess: () => {
-                  console.log('✅ Status update successful');
-                  Alert.alert('Success', 'Status updated successfully');
-                },
-                onError: (error) => {
-                  console.log('❌ Status update failed:', error);
-                  Alert.alert(
-                    'Error',
-                    error instanceof Error
-                      ? error.message
-                      : 'Failed to update status',
-                  );
-                },
-              },
-            );
+    const confirmMessage = `Mark order as "${statusLabel}"?`;
+
+    if (Platform.OS === 'web') {
+      console.log('🚨 Showing web confirm dialog');
+      const confirmed = window.confirm(confirmMessage);
+      console.log('- user confirmed:', confirmed);
+
+      if (confirmed) {
+        console.log('🚀 User confirmed - starting mutation');
+        console.log('- orderId:', currentOrder.id);
+        console.log('- status:', nextStatus);
+
+        updateStatusMutation.mutate(
+          { orderId: currentOrder.id, status: nextStatus },
+          {
+            onSuccess: (data) => {
+              console.log('✅ Status update successful:', data);
+              window.alert('Status updated successfully');
+            },
+            onError: (error) => {
+              console.log('❌ Status update failed:', error);
+              console.log('- error type:', typeof error);
+              console.log('- error message:', error instanceof Error ? error.message : 'Unknown error');
+              window.alert(
+                error instanceof Error
+                  ? error.message
+                  : 'Failed to update status'
+              );
+            },
           },
-        },
-      ],
-    );
+        );
+      }
+    } else {
+      console.log('🚨 Showing mobile Alert dialog');
+      Alert.alert(
+        t('delivery.updateStatus'),
+        confirmMessage,
+        [
+          {
+            text: t('common.cancel'),
+            style: 'cancel',
+            onPress: () => console.log('❌ User cancelled')
+          },
+          {
+            text: t('common.confirm'),
+            onPress: () => {
+              console.log('🚀 User confirmed - starting mutation');
+              console.log('- orderId:', currentOrder.id);
+              console.log('- status:', nextStatus);
+
+              updateStatusMutation.mutate(
+                { orderId: currentOrder.id, status: nextStatus },
+                {
+                  onSuccess: (data) => {
+                    console.log('✅ Status update successful:', data);
+                    Alert.alert('Success', 'Status updated successfully');
+                  },
+                  onError: (error) => {
+                    console.log('❌ Status update failed:', error);
+                    console.log('- error type:', typeof error);
+                    console.log('- error message:', error instanceof Error ? error.message : 'Unknown error');
+                    Alert.alert(
+                      'Error',
+                      error instanceof Error
+                        ? error.message
+                        : 'Failed to update status',
+                    );
+                  },
+                },
+              );
+            },
+          },
+        ],
+      );
+    }
+    console.log('🚨 Confirmation dialog called');
   };
 
   const handleCall = (phoneNumber: string) => {
