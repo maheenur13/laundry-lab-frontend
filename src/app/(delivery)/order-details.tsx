@@ -50,15 +50,26 @@ export default function DeliveryOrderDetailsScreen() {
   const lang = i18n.language as 'en' | 'bn';
 
   const handleUpdateStatus = async () => {
-    if (!currentOrder) return;
+    console.log('🔄 handleUpdateStatus called');
+    console.log('- currentOrder:', currentOrder);
+
+    if (!currentOrder) {
+      console.log('❌ No current order found');
+      return;
+    }
 
     const nextStatus = getNextDeliveryStatus(currentOrder.status);
+    console.log('- current status:', currentOrder.status);
+    console.log('- next status:', nextStatus);
+
     if (!nextStatus) {
+      console.log('❌ No next status available');
       Alert.alert('Info', 'Order is already completed');
       return;
     }
 
     const statusLabel = ORDER_STATUS_CONFIG[nextStatus].label[lang];
+    console.log('- status label:', statusLabel);
 
     Alert.alert(
       t('delivery.updateStatus'),
@@ -68,13 +79,16 @@ export default function DeliveryOrderDetailsScreen() {
         {
           text: t('common.confirm'),
           onPress: () => {
+            console.log('🚀 Confirming status update');
             updateStatusMutation.mutate(
               { orderId: currentOrder.id, status: nextStatus },
               {
                 onSuccess: () => {
+                  console.log('✅ Status update successful');
                   Alert.alert('Success', 'Status updated successfully');
                 },
                 onError: (error) => {
+                  console.log('❌ Status update failed:', error);
                   Alert.alert(
                     'Error',
                     error instanceof Error
@@ -115,6 +129,12 @@ export default function DeliveryOrderDetailsScreen() {
   const nextStatusLabel = nextStatus
     ? ORDER_STATUS_CONFIG[nextStatus].label[lang]
     : null;
+
+  // Debug logging for button rendering
+  console.log('🔘 Button Debug:');
+  console.log('- nextStatus:', nextStatus);
+  console.log('- nextStatusLabel:', nextStatusLabel);
+  console.log('- should show button:', !!nextStatusLabel);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
